@@ -45,6 +45,10 @@ def test_algorithm(test: ProblemInstance, expected_result: ProblemInstance, algo
 		print(f'Test case passed: {name}')
 	else:
 		print(f'Test case failed: {name}')
+		print(test_copy.assignments)
+		print(expected_result.assignments)
+		# print(test_copy.free_space)
+		# print(expected_result.free_space)
 
 def zip_tree_tests():
 	print('testing ZipTree')
@@ -101,6 +105,8 @@ def bin_packing_tests():
 	# first-fit
 	expected_result = ProblemInstance(items = items, assignments = [0, 0, 1, 1, 2, 1, 3, 3], free_space = [0.1, 0.0, 0.3, 0.0])
 	test_algorithm(test1, expected_result, requirements.first_fit, 'first_fit')
+ 
+	print()
 
 	# first-fit decreasing
 	expected_result = ProblemInstance(items = items, assignments = [0, 1, 2, 3, 2, 1, 0, 3], free_space = [0.0, 0.0, 0.0, 0.4])
