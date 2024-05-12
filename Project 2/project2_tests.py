@@ -47,7 +47,7 @@ def test_algorithm(test: ProblemInstance, expected_result: ProblemInstance, algo
 		print(f'Test case failed: {name}')
 		print(test_copy.assignments)
 		print(expected_result.assignments)
-		# print(test_copy.free_space)
+		print(test_copy.free_space)
 		# print(expected_result.free_space)
 
 def zip_tree_tests():

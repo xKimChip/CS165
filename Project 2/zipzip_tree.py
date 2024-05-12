@@ -55,7 +55,7 @@ class ZipZipTree:
 
         x = TreeNode(key, val, rank)  # Create the new node
         cur = self.head
-        prev = None
+        prev = self.head
 
         # Find the insertion point based on rank and key
         while cur and (rank < cur.rank or (rank == cur.rank and key > cur.key)):
@@ -214,31 +214,38 @@ class ZipZipTree:
     def rebalanceTree(self, key: KeyType):
         nodelist = list()
         self.__findPath(key, list = nodelist)
+        print (len(nodelist))
+        if (self.head.left): 
+            print (self.head.left.value)
+        if (self.head.right):
+            print (self.head.right.value)
         
         for x in range(len(nodelist)):
-            maxvalue = nodelist[x].value
+            maxvalue = Decimal(str(nodelist[x].value))
             # check which children the node has
             if nodelist[x].left and nodelist[x].right:
-                maxvalue = max(nodelist[x].value, nodelist[x].left.value, nodelist[x].right.value)
+                maxvalue = max(Decimal(str(nodelist[x].value)), Decimal(str(nodelist[x].left.value)), Decimal(str(nodelist[x].right.value)))
             elif nodelist[x].left:
-                maxvalue = max(nodelist[x].value,  nodelist[x].left.value)
+                maxvalue = max(Decimal(str(nodelist[x].value)),  Decimal(str(nodelist[x].left.value)))
             elif nodelist[x].right:
-                maxvalue = max(nodelist[x].value, nodelist[x].right.value)
+                maxvalue = max(Decimal(str(nodelist[x].value)), Decimal(str(nodelist[x].right.value)))
+            
+            print(maxvalue)
                 
             # if the max between parent and two children is parents value, then no need to update the rest
-            if maxvalue == nodelist[x].value:
-                break
+
             # if not, then update parent and keep going through list
-            else:
-                nodelist[x].value = Decimal(str(maxvalue))
+            nodelist[x].value = Decimal(str(maxvalue))
+
         pass
 
     # this can assume a node is in the tree because we have already found it
     def __findPath(self, key: KeyType, list: list[TreeNode]):
         cur = self.head
+        list.insert(0, cur)
         while key != cur.key:
-            list.insert(0, cur)
             cur = cur.left if key < cur.key else cur.right
+            list.insert(0, cur)
         pass
 
         
