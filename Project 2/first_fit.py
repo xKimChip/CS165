@@ -1,7 +1,7 @@
 import sys
 from decimal import *
 from zipzip_tree import ZipZipTree, Rank
-from math import fabs, isclose
+from hybrid_sort import hybrid
 
 
 def first_fit(items: list[float], assignment: list[int], free_space: list[float]):
@@ -28,7 +28,7 @@ def first_fit(items: list[float], assignment: list[int], free_space: list[float]
         else:
             # find the first bin according to freeSpace
             
-            while True:
+            while cur:
                 if cur.left and Decimal(str(cur.left.value)) >= Decimal(str(items[i])):
                     cur = cur.left
                 elif Decimal(str(free_space[cur.key])) >= Decimal(str(items[i])):
@@ -38,10 +38,11 @@ def first_fit(items: list[float], assignment: list[int], free_space: list[float]
                 else:
                     break
                 
-            # cur = binTree.inorder(binTree.head, items[i], free_space=free_space)
+            # cur = binTree.inorder(items[i])
 
             keyFind = cur.key
             free_space[keyFind] = Decimal(str(free_space[keyFind])) - Decimal(str(items[i]))
+            cur.value = Decimal(str(free_space[keyFind])) - Decimal(str(items[i]))
             assignment[i] = keyFind
         
         # check cur's value an update it if needed
@@ -55,17 +56,19 @@ def first_fit(items: list[float], assignment: list[int], free_space: list[float]
         cur.value = maxvalue
         # if cur's children has most free space, then done
         # if cur has the biggest space, rebalance the values in the tree
-        if Decimal(str(cur.value)) > Decimal(str(free_space[cur.key])):
-        #     # rebalance the tree
-            binTree.rebalanceTree(keyFind)
+        # rebalance the tree
+        binTree.inorderbal(keyFind, free_space)
           
-        for i in range(len(free_space)):
-            free_space[i] = float(free_space[i])
+    for i in range(len(free_space)):
+        free_space[i] = float(free_space[i])
     
 
 
 
 
 def first_fit_decreasing(items: list[float], assignment: list[int], free_space: list[float]):
-    
+    hybrid(items)
+    # print(items)
+    first_fit(items=items, assignment=assignment, free_space=free_space)
     pass
+

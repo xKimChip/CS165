@@ -7,7 +7,6 @@ import sys
 import random
 from math import log
 from collections import namedtuple
-from math import fabs
 from decimal import *
 
 from typing import TypeVar
@@ -16,6 +15,7 @@ from dataclasses import dataclass
 KeyType = TypeVar('KeyType')
 ValType = TypeVar('ValType')
 Rank = namedtuple("Rank", ["geometric_rank", "uniform_rank"])
+tup = namedtuple('val', ['index', 'maxval'])
 
 # @dataclass
 # class Rank:
@@ -52,10 +52,12 @@ class ZipZipTree:
     def insert(self, key: KeyType, val: ValType, rank: Rank = None):
         if rank is None:
             rank = self.get_random_rank()
-
+        # increase size for new node inserted
+        self.size += 1
         x = TreeNode(key, val, rank)  # Create the new node
         cur = self.head
-        prev = self.head
+        prev = None
+        fix = None
 
         # Find the insertion point based on rank and key
         while cur and (rank < cur.rank or (rank == cur.rank and key > cur.key)):
@@ -72,83 +74,148 @@ class ZipZipTree:
         else:
             prev.right = x
         
-        # increase size for new node inserted
-        self.size += 1
+
         
         # Establish horizontal links
-        if cur:
-            if key < cur.key:
-                x.right = cur
-            else:
-                x.left = cur
-        else:  # Reached the end of the list
+        if cur is None:
             x.left, x.right = None, None
             return x
 
+        if key < cur.key:
+            x.right = cur
+        else:
+            x.left = cur
+
         # Fix vertical links from bottom up
         prev = x
+
         while cur:
             fix = prev
-            if cur.key < key:
-                while cur and cur.key < key:
+            if cur.key < key: 
+                while cur and cur.key <= key:  # Check for prev
                     prev, cur = cur, cur.right
-            else:
-                while cur and cur.key > key:
+            else:  
+                while cur and cur.key >= key:  # Check for prev
                     prev, cur = cur, cur.left
 
-            if (fix.key > key) or (fix == x and prev.key > key):
+            if fix.key > key or (fix == x and prev.key > key):
                 fix.left = cur
             else:
-                fix.right = cur  
+                fix.right = cur
+     
+        
         return x
 
     # removes item with parameter key from tree.
     # you can assume that the item exists in the tree.
+
+
     def remove(self, key: KeyType):
-        #Establish bases, cur = tree traverser, prev is the parent of cur
-        # key     #May not need, key is nodes key, self.key is a key from tree but isnt real
         cur = self.head
         prev = None
 
-        # Find the key iteratively
         while key != cur.key:
             prev = cur
-            cur = cur.left if key < cur.key else cur.right
+            if key < cur.key:
+                cur = cur.left
+            else:
+                cur = cur.right
+
         left = cur.left
         right = cur.right
 
-        if not left:
+        if left is None:
             cur = right
-        elif not right:
+        elif right is None:
             cur = left
         elif left.rank >= right.rank:
             cur = left
         else:
             cur = right
 
-        # if the removal node is the root of the tree
-        if key == self.head.key:
+        if self.head.key == key:
             self.head = cur
-        # if key is less than parent, parents left is cur
         elif key < prev.key:
             prev.left = cur
         else:
             prev.right = cur
 
-        #Fix
         while left and right:
             if left.rank >= right.rank:
-                while not left or left.rank < right.rank:
+                while left and left.rank >= right.rank:
                     prev = left
                     left = left.right
                 prev.right = right
             else:
-                while not right or left.rank >= right.rank:
+                while right and left.rank < right.rank:
                     prev = right
                     right = right.left
                 prev.left = left
-        self.size -= 1
-        pass
+
+    # def newinsert(self, key: KeyType, val: ValType, rank: Rank = None):
+    #     ins = TreeNode(key, val, rank=self.get_random_rank())
+    #     self.size += 1
+    #     self.__insert(self.head, ins)
+        
+
+    # def __insert(self, node: TreeNode, x: TreeNode):
+    #     if node is None:
+    #         self.head = x
+    #         x.left = None
+    #         x.right = None
+    #         return x
+        
+    #     if x.key < node.key:
+    #         if self.__insert(node.left, x ) == x:
+    #             if x.rank < node.rank:
+    #                 node.left = x
+    #             else:
+    #                 node.left = x.right
+    #                 x.right = node
+    #                 return x
+    #     else:
+    #         if self.__insert(node.right, x ) == x:
+    #             if x.rank <= node.rank:
+    #                 node.right = x
+    #             else:
+    #                 node.right = x.left
+    #                 x.left = node
+    #                 return x
+    #     return node
+    
+    # def __zip(self, x: TreeNode, y: TreeNode):
+    #     if x is None:
+    #         return y
+    #     if y is None:
+    #         return x
+    #     if x.rank < y.rank:
+    #         y.left = zip(x, y.left)
+    #         return y
+    #     else:
+    #         x.right = zip(x.right, y)
+    #         return x
+    
+    # def newremove(self, key: KeyType):
+    #     rem = TreeNode(key, -1, -1)
+    #     self.size -= 1
+    #     self.__remove(self.head, rem)
+        
+    # def __remove(self, node: TreeNode, x: TreeNode):
+    #     if x.key == node.key:
+    #         return self.__zip(node.left, node.right)
+    #     if x.key < node.key:
+    #         if x.key == node.left.key:
+    #             node.left = self.__zip(node.left.left, node.left.right)
+    #         else:
+    #             self.__remove(node.left, x)
+    #     else:
+    #         if x.key == node.right.key:
+    #             node.right = self.__zip(node.right.left, node.right.right)
+    #         else:
+    #             self.__remove(node.right, x)
+    #     self.head = node
+    #     return node
+
     # returns the value of item with parameter key.
     # you can assume that the item exists in the tree.
     def find(self, key: KeyType) -> ValType:
@@ -248,8 +315,45 @@ class ZipZipTree:
             list.insert(0, cur)
         pass
 
+    def inorderbal(self, key: KeyType, free_space: list):
+        self.__inorderbal(self.head, key, free_space=free_space)
+
+    def __inorderbal(self, node: TreeNode, key: KeyType, free_space: list):
+
+        if key < node.key:
+            self.__inorderbal(node.left, key, free_space=free_space)
+        elif key > node.key:
+            self.__inorderbal(node.right, key, free_space=free_space)  
+
+        leftval = -1
+        rightval = -1
+
+        if node.left:
+            leftval = Decimal(str(node.left.value))
+        if node.right:
+            rightval = Decimal(str(node.right.value))
+        node.value = Decimal(str(max(Decimal(str(leftval)), Decimal(str(rightval)), Decimal(str(free_space[node.key])))))
+
+        return
+
         
-    
+    def find_best_fit(self, item_size):
+        current = self.head
+        best_fit_node = None
+
+        while current:
+            if current.key >= item_size:
+                if best_fit_node is None or current.key <= best_fit_node.key:   # added the <= instead of < because it should be better
+                    best_fit_node = current
+                # Move left to find a smaller suitable node
+                current = current.left
+            else:
+                # Move right since the current node cannot fit the item
+                current = current.right
+
+        return best_fit_node
+
+
 	# feel free to define new methods in addition to the above
 	# fill in the definitions of each required member function (above),
 	# and for any additional member functions you define
