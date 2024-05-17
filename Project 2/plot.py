@@ -5,9 +5,9 @@ from collections import defaultdict
 from sklearn.metrics import r2_score
 
 
-GROUP = True
+GROUP = False
 
-LOGLOG = False
+LOGLOG = True
 DATA_PATH = './data_openlab_node/'
 SAVE_PATH = './plot/'
 
@@ -37,26 +37,26 @@ FILES = {
         'file': 'best_fit_decreasing_waste',
         'skip': 7
     },
-    'Next Fit Time': {
-        'file': 'next_fit_time',
-        'skip': 2
-    },
-    'First Fit Time': {
-        'file': 'first_fit_time',
-        'skip': 4
-    },
-    'First Fit Decreasing Time': {
-        'file': 'first_fit_decreasing_time',
-        'skip': 4
-    },
-    'Best Fit Time': {
-        'file': 'best_fit_time',
-        'skip': 4
-    },
-    'Best Fit Decreasing Time': {
-        'file': 'best_fit_decreasing_time',
-        'skip': 4
-    },
+    # 'Next Fit Time': {
+    #     'file': 'next_fit_time',
+    #     'skip': 2
+    # },
+    # 'First Fit Time': {
+    #     'file': 'first_fit_time',
+    #     'skip': 4
+    # },
+    # 'First Fit Decreasing Time': {
+    #     'file': 'first_fit_decreasing_time',
+    #     'skip': 4
+    # },
+    # 'Best Fit Time': {
+    #     'file': 'best_fit_time',
+    #     'skip': 4
+    # },
+    # 'Best Fit Decreasing Time': {
+    #     'file': 'best_fit_decreasing_time',
+    #     'skip': 4
+    # },
 }
 
 
@@ -72,18 +72,18 @@ DATA = {
             'Best Fit Decreasing Waste'
         ]
     },
-    'Time Comparison': {
-        'xlabel': 'Input Size (n, # of elements)',
-        'ylabel': LABEL['time'],
-        'files': [
-            'Next Fit Time',
-            'First Fit Time',
-            'First Fit Decreasing Time',
-            'Best Fit Time',
-            'Best Fit Decreasing Time'
-        ]
-    },
-    'First Fit Decreasing v.s. Best Fit Decreasing (Waste)': {
+    # 'Time Comparison': {
+    #     'xlabel': 'Input Size (n, # of elements)',
+    #     'ylabel': LABEL['time'],
+    #     'files': [
+    #         'Next Fit Time',
+    #         'First Fit Time',
+    #         'First Fit Decreasing Time',
+    #         'Best Fit Time',
+    #         'Best Fit Decreasing Time'
+    #     ]
+    # },
+    'FF Decreasing v.s. BF Decreasing (Waste)': {
         'xlabel': 'Input Size (n, # of elements)',
         'ylabel': LABEL['waste'],
         'files': [
@@ -91,14 +91,14 @@ DATA = {
             'Best Fit Decreasing Waste'
         ]
     },
-    'First Fit Decreasing v.s. Best Fit Decreasing (Time)': {
-        'xlabel': 'Input Size (n, # of elements)',
-        'ylabel': LABEL['time'],
-        'files': [
-            'First Fit Decreasing Time',
-            'Best Fit Decreasing Time'
-        ]
-    }
+    # 'FF Decreasing v.s. BF Decreasing (Time)': {
+    #     'xlabel': 'Input Size (n, # of elements)',
+    #     'ylabel': LABEL['time'],
+    #     'files': [
+    #         'First Fit Decreasing Time',
+    #         'Best Fit Decreasing Time'
+    #     ]
+    # }
 }
 
 
@@ -138,9 +138,10 @@ def add_to_plot(file: str, label: str, loglog = True, skip = 0):
 
         p = plt.loglog(sizes, avg_times, '.', base = 2, label=f'{label} Data Points')
         plt.loglog(x, np.exp(exp_y), '--', base = 2, color=p[-1].get_color(),
-                label=f'{label} #Fit: log C(n) ~ {m:.4f} log n + {b:.4f}, R^2 = {r2:.4f}',)
+                # label=f'{label} #Fit: log C(n) ~ {m:.4f} log n + {b:.4f}, R^2 = {r2:.4f}',)
+                label=f'{label} #Fit: log W(A) ~ {m:.4f} log n + {b:.4f}, R^2 = {r2:.4f}',)
         
-        print(f'{label}: log C(n) ~ {m:.4f} log n + {b:.4f}')
+        # print(f'{label}: log C(n) ~ {m:.4f} log n + {b:.4f}')
 
     else:
         x, y = sizes[skip:], avg_times[skip:]
@@ -161,6 +162,7 @@ def add_to_plot(file: str, label: str, loglog = True, skip = 0):
 
 def plot_all():
     for label, data in FILES.items():
+
         plt.figure(figsize=(8, 5), dpi=150)
         plt.title(label=label, fontsize=12)
     
@@ -178,20 +180,27 @@ def plot_all():
 def plot_data():
     sample_size = 0
     for label, data in DATA.items():
+
         plt.figure(figsize=(8, 5), dpi=150)
         plt.title(label=label, fontsize=12)
 
         plt.xlabel(data['xlabel'])
         plt.ylabel(data['ylabel'])
 
+        # plt.loglog(subset['Array Size'], subset['Time (ns)'], label=f'{algorithm} ~ {round(m,5)} log N + {round(b,5)}', marker='o')
+
         for file in data['files']:
+
             sample_size += add_to_plot(DATA_PATH + FILES[file]['file'] + '.csv', file, LOGLOG, FILES[file]['skip'])    
 
         plt.legend(loc='upper left', fontsize=8)
         #plt.subplots_adjust(bottom=0.15)
         plt.text(0.05, 0.03, f'Sample Size: {sample_size} points.', transform=plt.gcf().transFigure, fontsize = 8,
                 bbox=dict(boxstyle = 'round', edgecolor = 'lightgray', facecolor = 'white'))
+        plt.xscale('log',base=2)
+        plt.yscale('log',base=2)
         plt.savefig(SAVE_PATH + label + '.png', dpi=300)
+        
         plt.cla()
 
 
