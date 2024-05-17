@@ -123,7 +123,7 @@ class ZipZipTree:
 
         left = cur.left
         right = cur.right
-
+        
         if left is None:
             cur = right
         elif right is None:
@@ -133,6 +133,7 @@ class ZipZipTree:
         else:
             cur = right
 
+        parent = cur
         if self.head.key == key:
             self.head = cur
         elif key < prev.key:
@@ -151,70 +152,8 @@ class ZipZipTree:
                     prev = right
                     right = right.left
                 prev.left = left
+        return parent
 
-    # def newinsert(self, key: KeyType, val: ValType, rank: Rank = None):
-    #     ins = TreeNode(key, val, rank=self.get_random_rank())
-    #     self.size += 1
-    #     self.__insert(self.head, ins)
-        
-
-    # def __insert(self, node: TreeNode, x: TreeNode):
-    #     if node is None:
-    #         self.head = x
-    #         x.left = None
-    #         x.right = None
-    #         return x
-        
-    #     if x.key < node.key:
-    #         if self.__insert(node.left, x ) == x:
-    #             if x.rank < node.rank:
-    #                 node.left = x
-    #             else:
-    #                 node.left = x.right
-    #                 x.right = node
-    #                 return x
-    #     else:
-    #         if self.__insert(node.right, x ) == x:
-    #             if x.rank <= node.rank:
-    #                 node.right = x
-    #             else:
-    #                 node.right = x.left
-    #                 x.left = node
-    #                 return x
-    #     return node
-    
-    # def __zip(self, x: TreeNode, y: TreeNode):
-    #     if x is None:
-    #         return y
-    #     if y is None:
-    #         return x
-    #     if x.rank < y.rank:
-    #         y.left = zip(x, y.left)
-    #         return y
-    #     else:
-    #         x.right = zip(x.right, y)
-    #         return x
-    
-    # def newremove(self, key: KeyType):
-    #     rem = TreeNode(key, -1, -1)
-    #     self.size -= 1
-    #     self.__remove(self.head, rem)
-        
-    # def __remove(self, node: TreeNode, x: TreeNode):
-    #     if x.key == node.key:
-    #         return self.__zip(node.left, node.right)
-    #     if x.key < node.key:
-    #         if x.key == node.left.key:
-    #             node.left = self.__zip(node.left.left, node.left.right)
-    #         else:
-    #             self.__remove(node.left, x)
-    #     else:
-    #         if x.key == node.right.key:
-    #             node.right = self.__zip(node.right.left, node.right.right)
-    #         else:
-    #             self.__remove(node.right, x)
-    #     self.head = node
-    #     return node
 
     # returns the value of item with parameter key.
     # you can assume that the item exists in the tree.
@@ -336,24 +275,124 @@ class ZipZipTree:
 
         return
 
+    # def bal(self, key: KeyType):
+    #     self.__bal(self.head, key)
+
+    # def __bal(self, node: TreeNode, key: KeyType):
+
+    #     if node and key < node.key:
+    #         self.__bal(node.left, key)
+    #     elif node and key > node.key and node.right:
+    #         self.__bal(node.right, key)  
+
+    #     if node is None:
+    #         return
+    #     leftval = -1
+    #     rightval = -1
+
+    #     if node.left:
+    #         leftval = Decimal(str(node.left.value[1]))
+    #     if node.right:
+    #         rightval = Decimal(str(node.right.value[1]))
+    # #     node.value = (node.value[0], Decimal(str(max(leftval, rightval, node.key))))
+
+    #     return
         
-    def find_best_fit(self, item_size):
-        current = self.head
-        best_fit_node = None
+    # def find_best_fit(self, item_size):
+    #     current = self.head
+    #     best_fit_node = None
+        
+    #     while current:
+    #         if current.left and current.left.value[1] >= item_size:
+    #             current = current.left
+    #         elif current.key >= item_size:
+    #             best_fit_node = current
+    #             break
+    #         elif current.right and current.right.value[1] >= item_size:
+    #             current = current.right
+    #         else:
+    #             break
 
-        while current:
-            if current.key >= item_size:
-                if best_fit_node is None or current.key <= best_fit_node.key:   # added the <= instead of < because it should be better
-                    best_fit_node = current
-                # Move left to find a smaller suitable node
-                current = current.left
+    #     return best_fit_node
+
+    def min(self, key: KeyType):
+        return self.__min(self.head, key)
+    
+    def __min(self, node: TreeNode, key: KeyType):
+        if node is None:
+            return None
+        
+        diff = node.key - key
+        minNode = None
+        cur = node
+        while cur:
+            curDiff = cur.key - key
+            if curDiff < diff:
+                diff = curDiff
+                minNode = cur
+                
+            if key < cur.key:
+                cur = cur.left
+            elif key > cur.key:
+                cur = cur.right
             else:
-                # Move right since the current node cannot fit the item
-                current = current.right
+                break
+        return minNode
+            
+        
+                
+            
 
-        return best_fit_node
-
+        
 
 	# feel free to define new methods in addition to the above
 	# fill in the definitions of each required member function (above),
 	# and for any additional member functions you define
+    # def remove(self, key: KeyType):
+    #     cur = self.head     
+    #     prev = None
+
+    #     while key != cur.key:       # find the node that holds the key to remove
+    #         prev = cur
+    #         if key < cur.key:
+    #             cur = cur.left
+    #         else:
+    #             cur = cur.right
+
+    #     left = cur.left             # cur is node with given key
+    #     right = cur.right
+        
+    #     #Deletion of the key node
+    #     if left is None:            # if left is null, cur is now cur.right, key is now gone
+    #         cur = right
+    #     elif right is None:         # if right is null, cur is now cur.left, key is now gone
+    #         cur = left
+    #     elif left.rank >= right.rank:   # if there is both children, cur is left if it out ranks right
+    #         cur = left
+    #     else:                           # else cur is now right 
+    #         cur = right
+
+    #     # parent = cur
+    #     if self.head.key == key:    # sets head if they are the same
+    #         self.head = cur
+    #     elif key < prev.key:        # put the child of old cur as the parents left or right
+    #         prev.left = cur
+    #     else:
+    #         prev.right = cur 
+
+    #     while left and right:       # if there is a left and a right we need to readjust the tree
+    #         if left.rank >= right.rank:
+    #             while left and left.rank >= right.rank:
+    #                 prev = left
+    #                 left = left.right
+    #             prev.right = right                    
+    #         else:
+    #             while right and left.rank < right.rank:
+    #                 prev = right
+    #                 right = right.left
+    #             prev.left = left
+    #     if right:
+    #         self.bal(right.key)
+    #     if left:
+    #         self.bal(left.key)
+    #     # return parent

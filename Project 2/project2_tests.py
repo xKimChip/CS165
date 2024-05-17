@@ -204,5 +204,18 @@ def bin_packing_tests():
 	# add new tests...
 
 if __name__ == '__main__':
+	# items = [0.1, 0.8, 0.3, 0.5, 0.7, 0.2, 0.6, 0.4]
+	# assignments = [0] * len(items)
+	# free_space = list()
+
+	# test1 = ProblemInstance(items = items, assignments = assignments, free_space = free_space)
+
+	# # best-fit
+	# expected_result = ProblemInstance(items = items, assignments = [0, 0, 1, 1, 2, 1, 3, 3], free_space = [0.1, 0.0, 0.3, 0.0])
+	# test_algorithm(test1, expected_result, requirements.best_fit, 'best_fit')
+
+	# # best-fit decreasing
+	# expected_result = ProblemInstance(items = items, assignments = [0, 1, 2, 3, 2, 1, 0, 3], free_space = [0.0, 0.0, 0.0, 0.4])
+	# test_algorithm(test1, expected_result, requirements.best_fit_decreasing, 'best_fit_decreasing')
 	zip_tree_tests()
 	bin_packing_tests()
