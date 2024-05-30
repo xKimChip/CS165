@@ -21,7 +21,7 @@ PROFILE = {
         'base': 2,
         'start_pow': 4,
         'target_pow': 18,
-        'repeat': 500,
+        'repeat': 50,
     }
 }
 ALGOS = [next_fit, first_fit, first_fit_decreasing, best_fit, best_fit_decreasing]
@@ -44,7 +44,7 @@ def repeat_benchmark(setting: dict) -> None:
             size = base ** po
             print(f'\t\tSize: {base}^{po} = {size}')
 
-            items = [round(random.uniform(0, 0.7), 10) for _ in range(size)]
+            items = [round(random.uniform(0, 0.4), 10) for _ in range(size)]
             # print('org items:', items)
             for algo in ALGOS:
                 waste, elapse_time = benchmark(algo, items.copy())
