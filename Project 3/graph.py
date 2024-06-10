@@ -6,6 +6,10 @@ from collections.abc import Iterable
 class Graph:
     def __init__(self, num_nodes: int, edges: Iterable[tuple[int, int]]):
         self.size = num_nodes
+        
+        
+        
+        
         pass
 
 
