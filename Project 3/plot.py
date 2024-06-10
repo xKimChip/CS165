@@ -4,103 +4,72 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 from sklearn.metrics import r2_score
 
-
 GROUP = True
 
-LOGLOG = True
+LOGLOG = False
+LOGLIN = True
 DATA_PATH = './data_openlab_node/'
 SAVE_PATH = './plot/'
 
 LABEL = {
-    'waste': 'Average Waste',
-    'time': 'Average Elapsed Time (nanoseconds)',
+    'cluster': 'Average Cluster Coefficient',
+    'degree': 'Average Degree Distribution',
+    'diameter': 'Average Diameter',
 }
 
 FILES = {
-    'Next Fit Waste': {
-        'file': 'next_fit_waste',
-        'skip': 2
+    'Erdos Renyi: Clustering Coefficient': {
+        'file': 'erdos_clustering_coefficient',
+        'skip': 0
     },
-    'First Fit Waste': {
-        'file': 'first_fit_waste',
-        'skip': 7
+    'Erdos Renyi: Degree Distribution': {
+        'file': 'erdos_degree_distribution',
+        'skip': 0
     },
-    'First Fit Decreasing Waste': {
-        'file': 'first_fit_decreasing_waste',
-        'skip': 7
+    'Erdos Renyi: Diameter': {
+        'file': 'erdos_diameter',
+        'skip': 0
     },
-    'Best Fit Waste': {
-        'file': 'best_fit_waste',
-        'skip': 7
+    'Barbasi Albert: Clustering Coefficient': {
+        'file': 'ba_clustering_coefficient',
+        'skip': 0
     },
-    'Best Fit Decreasing Waste': {
-        'file': 'best_fit_decreasing_waste',
-        'skip': 7
+    'Barbasi Albert: Degree Distribution': {
+        'file': 'ba_degree_distribution',
+        'skip': 0
     },
-    'Next Fit Time': {
-        'file': 'next_fit_time',
-        'skip': 2
-    },
-    'First Fit Time': {
-        'file': 'first_fit_time',
-        'skip': 4
-    },
-    'First Fit Decreasing Time': {
-        'file': 'first_fit_decreasing_time',
-        'skip': 4
-    },
-    'Best Fit Time': {
-        'file': 'best_fit_time',
-        'skip': 4
-    },
-    'Best Fit Decreasing Time': {
-        'file': 'best_fit_decreasing_time',
-        'skip': 4
-    },
-}
-
-
-DATA = {
-    'Waste Comparison': {
-        'xlabel': 'Input Size (n, # of elements)',
-        'ylabel': LABEL['waste'],
-        'files': [
-            'Next Fit Waste',
-            'First Fit Waste',
-            'First Fit Decreasing Waste',
-            'Best Fit Waste',
-            'Best Fit Decreasing Waste'
-        ]
-    },
-    'Time Comparison': {
-        'xlabel': 'Input Size (n, # of elements)',
-        'ylabel': LABEL['time'],
-        'files': [
-            'Next Fit Time',
-            'First Fit Time',
-            'First Fit Decreasing Time',
-            'Best Fit Time',
-            'Best Fit Decreasing Time'
-        ]
-    },
-    'First Fit Decreasing v.s. Best Fit Decreasing (Waste)': {
-        'xlabel': 'Input Size (n, # of elements)',
-        'ylabel': LABEL['waste'],
-        'files': [
-            'First Fit Decreasing Waste',
-            'Best Fit Decreasing Waste'
-        ]
-    },
-    'First Fit Decreasing v.s. Best Fit Decreasing (Time)': {
-        'xlabel': 'Input Size (n, # of elements)',
-        'ylabel': LABEL['time'],
-        'files': [
-            'First Fit Decreasing Time',
-            'Best Fit Decreasing Time'
-        ]
+    'Barbasi Albert: Diameter': {
+        'file': 'ba_diameter',
+        'skip': 0
     }
 }
 
+DATA = {
+    'Clustering Coefficient Comparison': {
+        'xlabel': 'Input Size (n, # of elements)',
+        'ylabel': LABEL['cluster'],
+        'files': [
+            'Erdos Renyi: Clustering Coefficient',
+            'Barbasi Albert: Clustering Coefficient'
+        ]
+    },
+    'Degree Distribution Comparison': {
+        'xlabel': 'Input Size (n, # of elements)',
+        'ylabel': LABEL['degree'],
+        'files': [
+            'Erdos Renyi: Degree Distribution',
+            'Barbasi Albert: Degree Distribution'
+        ]
+    },
+    'Diameter Comparison': {
+        'xlabel': 'Input Size (n, # of elements)',
+        'ylabel': LABEL['diameter'],
+        'files': [
+            'Erdos Renyi: Diameter',
+            'Barbasi Albert: Diameter'
+        ] 
+    },
+}
 
 def load_data(file: str) -> dict:
     data = defaultdict(list)
@@ -109,7 +78,6 @@ def load_data(file: str) -> dict:
         for row in reader:
             data[int(row[0])].append(float(row[1]))
     return data
-
 
 def load_avg_data(file: str) -> tuple:
     data = load_data(file)
@@ -121,6 +89,7 @@ def load_avg_data(file: str) -> tuple:
         avg_times.append(sum(time) / len(time))
     
     return sample_size, sizes, avg_times
+
 
 
 def add_to_plot(file: str, label: str, loglog = True, skip = 0):
@@ -142,6 +111,22 @@ def add_to_plot(file: str, label: str, loglog = True, skip = 0):
         
         print(f'{label}: log C(n) ~ {m:.4f} log n + {b:.4f}')
 
+    elif LOGLIN:
+        x, y = sizes[skip:], avg_times[skip:]
+        log_x = np.log(x)
+        m, b = np.polyfit(log_x, y, 1)
+        fit_func = np.poly1d((m,b))
+        exp_y = fit_func(x)
+        r2 = r2_score(y, exp_y)
+        
+        p = plt.plot(sizes, avg_times, '.-', label=f'{label} Data Points')
+        graph_name = 'Erdos' if 'erdos_clustering_coefficient' in file['file'] or 'erdos_degree_distribution' in file['file'] or 'erdos_diameter' in file['file'] else 'BA'
+        plt.loglog(x, np.exp(exp_y), '--', base = 2, color=p[-1].get_color(),
+                label=f'{label} #{graph_name} ~ {m:.4f} log n + {b:.4f}, R^2 = {r2:.4f}',)
+
+        plt.gca().set_yscale('linear')
+        
+        
     else:
         x, y = sizes[skip:], avg_times[skip:]
         m, b = np.polyfit(x, y, 1)
@@ -150,8 +135,9 @@ def add_to_plot(file: str, label: str, loglog = True, skip = 0):
         r2 = r2_score(y, exp_y)
 
         p = plt.plot(sizes, avg_times, '.-', label=f'{label} Data Points')
+        graph_name = 'Erdos' if 'erdos_clustering_coefficient' in file['file'] or 'erdos_degree_distribution' in file['file'] or 'erdos_diameter' in file['file'] else 'BA'
         plt.plot(x, exp_y, '--', color=p[-1].get_color(),
-                label=f'{label} #Fit: W(A) ~ {m:.4f} n + {b:.4f}, R^2 = {r2:.4f}',)
+                label=f'{label} {graph_name} ~ {m:.4f} n + {b:.4f}, R^2 = {r2:.4f}',)
 
         plt.gca().set_xscale('linear')
         plt.gca().set_yscale('linear')
@@ -166,7 +152,7 @@ def plot_all():
     
         sample_size = add_to_plot(DATA_PATH + data['file'] + '.csv', label, LOGLOG, data['skip'])
         plt.xlabel('Input Size (n, # of elements)')
-        plt.ylabel(LABEL['waste' if 'waste' in data['file'] else 'time'])
+        plt.ylabel(LABEL['cluster' if 'cluster' in data['file'] else 'degree' if 'degree' else 'diameter'])
         plt.legend(loc='upper left', fontsize=8)
         #plt.subplots_adjust(bottom=0.15)
         plt.text(0.05, 0.03, f'Sample Size: {sample_size} points. / Skip = {data["skip"]}', transform=plt.gcf().transFigure, fontsize = 8,
