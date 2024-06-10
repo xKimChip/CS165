@@ -8,34 +8,34 @@ from graph import Graph
 #We can use graph degeneracy to get the diameter of the graph I believe?
 def get_diameter(graph: Graph) -> int:
     max_distance = 0
-    for x in range(graph.get_num_nodes()):
-        distances = graph.bfs(x)
-        max_distance = max(max_distance, max(distances))
+    distances = graph.bfs(0)
+    while(1):
+        #largest_distance = 0
+        r = 0
+        for i in range(0, len(distances)):
+            if distances[i] > distances[r]:
+                r = i
+        if distances[r] > max_distance:
+            max_distance = distances[r]
+            distances = graph.bfs(r)
+        else:
+            break
     return max_distance
     
 
+
 def get_clustering_coefficient(graph: Graph) -> float:
-    L, k = graph.degenerative_ordering()
-    degenerated_list = degernative_list(graph, L)
-    triangles = 0
-    #for each vertex in the degenerate list
-    for v in degenerated_list:
-        for u in range(0,len(v)):
-            for w in range(u,len(v)):
-                if graph.has_edge(v[u], v[w]):
-                    triangles += 1
+    triangle_count = graph.count_triangles() 
     denominator = 0
     for v in range(0, graph.num_nodes):
         dv = graph.get_degree(v)
         denominator +=  dv * (dv - 1) / 2
     
-    clustering_coefficient = (3 * triangles) / denominator
+    clustering_coefficient = (3 * triangle_count) / denominator
     return clustering_coefficient
         
+    
 
-            
-
-    #return clustering
 
 
 def get_degree_distribution(graph: Graph) -> dict[int, int]:
@@ -45,16 +45,3 @@ def get_degree_distribution(graph: Graph) -> dict[int, int]:
     sorted_deg_list = dict(sorted(deg_list.items(), key=operator.itemgetter(0)))
     return sorted_deg_list
 	
-
-def degernative_list(graph: Graph, ordering: list):
-    degenerated_list = [[] for _ in range(graph.num_nodes)]  
-    placed = set()
-
-    for v in ordering:
-        for neighbor in graph.get_neighbors(v):
-            if neighbor not in placed:
-                degenerated_list[v].append(neighbor)
-
-        placed.add(v)  
-
-    return degenerated_list
