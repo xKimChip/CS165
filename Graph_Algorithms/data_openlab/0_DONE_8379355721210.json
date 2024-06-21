@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "base": 100000,
+    "start_pow": 1,
+    "target_pow": 1,
+    "repeat": 200
+  },
+  "start_time": "Mon Jun 10 14:38:01 2024",
+  "finish_time": "Mon Jun 10 16:57:41 2024",
+  "total_time": 8380.44339632988
+}
